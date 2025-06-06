@@ -45,7 +45,11 @@ class HotStringAhk(var endingChars: Set<Char>) : BaseAhk() {
 
                 hotString.apply {
                     action?.let { runnable ->
-                        scope.launch { runnable.run() }
+                        scope.launch {
+                            runCatching {
+                                runnable.run()
+                            }
+                        }
                     } ?: replacement?.let {
                         AhkScriptRunner.runSendInput(it)
                     }

@@ -67,7 +67,11 @@ abstract class BaseAhk : AHK {
                 }
 
                 hotkeys[currentKeys]?.let { action ->
-                    scope.launch { action.run() }
+                    scope.launch {
+                        runCatching {
+                            action.run()
+                        }
+                    }
                 }
             }
 
