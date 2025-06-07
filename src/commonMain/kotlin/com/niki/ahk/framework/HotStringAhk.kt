@@ -2,11 +2,14 @@ package com.niki.ahk.framework
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.niki.ahk.utils.AhkScriptRunner
+import com.niki.common.logD
 import kotlinx.coroutines.launch
 import java.awt.Robot
 import java.awt.event.KeyEvent
 
 class HotStringAhk(var endingChars: Set<Char>) : BaseAhk() {
+    constructor(vararg endingChars: Char) : this(endingChars.toSet())
+
     private val robot = Robot()
     private val sb = StringBuilder()
 
@@ -44,14 +47,18 @@ class HotStringAhk(var endingChars: Set<Char>) : BaseAhk() {
                 }
 
                 hotString.apply {
-                    action?.let { runnable ->
-                        scope.launch {
+                    scope.launch {
+                        action?.let { runnable ->
                             runCatching {
+                                logD("hotString: $hotString called")
                                 runnable.run()
                             }
+                        } ?: replacement?.let {
+                            runCatching {
+                                logD("hotString: $hotString called")
+                                AhkScriptRunner.runSendInput(it)
+                            }
                         }
-                    } ?: replacement?.let {
-                        AhkScriptRunner.runSendInput(it)
                     }
                 }
                 return

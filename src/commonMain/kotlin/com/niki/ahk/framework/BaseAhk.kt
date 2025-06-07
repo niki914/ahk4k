@@ -5,6 +5,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import com.niki.ahk.HotString
 import com.niki.ahk.Key
+import com.niki.common.logD
 import kotlinx.coroutines.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -15,7 +16,7 @@ abstract class BaseAhk : AHK {
     protected val hotStrings = mutableMapOf<String, HotString>()
 
     protected val scope = CoroutineScope(Dispatchers.Default)
-    private val keys = mutableSetOf<Key>()
+    private val pressingKeys = mutableSetOf<Key>()
 
     private var isRunning = false
 
@@ -28,24 +29,29 @@ abstract class BaseAhk : AHK {
     }
 
     override fun registerHotkey(vararg keys: Key, runnable: Runnable) {
+        logD("hotkey[$keys] registered")
         val keySet = keys.toSet()
         hotkeys[keySet] = runnable
     }
 
     override fun unregisterHotkey(vararg keys: Key) {
+        logD("hotkey[$keys] unregistered")
         val keySet = keys.toSet()
         hotkeys.remove(keySet)
     }
 
     override fun registerHotString(string: String, runnable: Runnable) {
+        logD("hotString[$string] registered")
         hotStrings[string.lowercase()] = HotString(action = runnable)
     }
 
     override fun registerHotString(string: String, replacement: String) {
+        logD("hotString[$string] registered")
         hotStrings[string.lowercase()] = HotString(replacement = replacement)
     }
 
     override fun unregisterHotString(string: String) {
+        logD("hotString[$string] unregistered")
         hotStrings.remove(string.lowercase())
     }
 
@@ -59,10 +65,11 @@ abstract class BaseAhk : AHK {
                 // 处理热键
                 val key = Key.fromNativeKeyCode(event.keyCode) ?: return
 
-                keys.add(key)
-                hotkeys[keys]?.let { action ->
+                pressingKeys.add(key)
+                hotkeys[pressingKeys]?.let { action ->
                     scope.launch {
                         runCatching {
+                            logD("hotkey: $pressingKeys called")
                             action.run()
                         }
                     }
@@ -71,7 +78,7 @@ abstract class BaseAhk : AHK {
 
             override fun nativeKeyReleased(event: NativeKeyEvent) {
                 val key = Key.fromNativeKeyCode(event.keyCode) ?: return
-                keys.remove(key)
+                pressingKeys.remove(key)
             }
 
             override fun nativeKeyTyped(event: NativeKeyEvent) {
@@ -91,7 +98,7 @@ abstract class BaseAhk : AHK {
         if (!isRunning) return
         isRunning = false
         scope.cancel()
-        keys.clear()
+        pressingKeys.clear()
         GlobalScreen.unregisterNativeHook()
     }
 

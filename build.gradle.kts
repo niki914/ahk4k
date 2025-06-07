@@ -18,10 +18,11 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("com.github.kwhat:jnativehook:2.2.2") // 键盘监听
+
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0") // 协程
                 implementation("com.google.code.gson:gson:2.10.1") // gson
 
-                implementation("org.rocksdb:rocksdbjni:7.10.2")
+                implementation("org.rocksdb:rocksdbjni:7.10.2") // 数据库
 
                 implementation(compose.desktop.currentOs)
                 implementation(compose.runtime)
@@ -48,6 +49,7 @@ compose.desktop {
             packageName = "ahk4k"
             packageVersion = "1.0.0"
             windows {
+                menu = true
                 msiPackageVersion = packageVersion
                 exePackageVersion = packageVersion
             }
