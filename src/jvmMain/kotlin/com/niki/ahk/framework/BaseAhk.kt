@@ -15,6 +15,7 @@ abstract class BaseAhk : AHK {
     protected val hotStrings = mutableMapOf<String, HotString>()
 
     protected val scope = CoroutineScope(Dispatchers.Default)
+    private val keys = mutableSetOf<Key>()
 
     private var isRunning = false
 
@@ -57,16 +58,9 @@ abstract class BaseAhk : AHK {
             override fun nativeKeyPressed(event: NativeKeyEvent) {
                 // 处理热键
                 val key = Key.fromNativeKeyCode(event.keyCode) ?: return
-                val currentKeys = mutableSetOf<Key>().apply {
-                    if (event.modifiers and NativeKeyEvent.CTRL_MASK != 0) add(Key.Control)
-                    if (event.modifiers and NativeKeyEvent.ALT_MASK != 0) add(Key.Alt)
-                    if (event.modifiers and NativeKeyEvent.SHIFT_MASK != 0) add(Key.Shift)
-                    if (event.modifiers and NativeKeyEvent.META_MASK != 0) add(Key.Meta)
 
-                    add(key)
-                }
-
-                hotkeys[currentKeys]?.let { action ->
+                keys.add(key)
+                hotkeys[keys]?.let { action ->
                     scope.launch {
                         runCatching {
                             action.run()
@@ -75,7 +69,10 @@ abstract class BaseAhk : AHK {
                 }
             }
 
-            override fun nativeKeyReleased(event: NativeKeyEvent) {}
+            override fun nativeKeyReleased(event: NativeKeyEvent) {
+                val key = Key.fromNativeKeyCode(event.keyCode) ?: return
+                keys.remove(key)
+            }
 
             override fun nativeKeyTyped(event: NativeKeyEvent) {
                 onNativeKeyTyped(event)
@@ -94,6 +91,7 @@ abstract class BaseAhk : AHK {
         if (!isRunning) return
         isRunning = false
         scope.cancel()
+        keys.clear()
         GlobalScreen.unregisterNativeHook()
     }
 

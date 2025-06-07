@@ -16,4 +16,26 @@ interface AHK {
 
     fun start()
     fun stop()
+
+
+    /**
+     * DSL 语法支持
+     */
+    interface AHKScope {
+        fun hotkey(block: HotkeyScope.() -> Unit)
+        fun hotString(block: HotStringScope.() -> Unit)
+        fun start()
+        fun stop()
+    }
+
+    interface HotkeyScope {
+        fun register(vararg keys: Key, action: () -> Unit)
+        fun unregister(vararg keys: Key)
+    }
+
+    interface HotStringScope {
+        fun register(string: String, action: () -> Unit)
+        fun register(string: String, replacement: String)
+        fun unregister(string: String)
+    }
 }

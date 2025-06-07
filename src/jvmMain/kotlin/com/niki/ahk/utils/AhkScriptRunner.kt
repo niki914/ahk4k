@@ -1,4 +1,4 @@
-package com.niki.ahk
+package com.niki.ahk.utils
 
 import java.io.File
 import java.io.FileOutputStream
