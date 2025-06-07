@@ -20,7 +20,7 @@ kotlin {
                 implementation("com.github.kwhat:jnativehook:2.2.2") // 键盘监听
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0") // 协程
-                implementation("com.google.code.gson:gson:2.10.1") // gson
+//                implementation("com.google.code.gson:gson:2.10.1") // gson
 
                 implementation("org.rocksdb:rocksdbjni:7.10.2") // 数据库
 
@@ -44,6 +44,10 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "com.niki.MainKt"
+        buildTypes.release.proguard {
+            configurationFiles.from("proguard-rules.pro")
+            isEnabled.set(true)
+        }
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe) // 指定生成EXE和MSI
             packageName = "ahk4k"

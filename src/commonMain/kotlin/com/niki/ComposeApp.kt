@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.niki.ahk.framework.HotStringAhk
+import com.niki.ahk.framework.AHK
 import com.niki.common.LogLevel
 import com.niki.common.logE
 import com.niki.common.logI
@@ -30,11 +30,7 @@ data class LogEntry(
 )
 
 @Composable
-fun composeApp() {
-    val ahk = HotStringAhk('\\', ' ', '\n')
-    val db = DBMap("ahk4k-db")
-    db.open()
-
+fun composeApp(ahk: AHK, db: DBMap) {
     val scope = CoroutineScope(Dispatchers.IO)
     val logs = remember { mutableStateListOf<LogEntry>() }
     val logChannel = remember { Channel<LogEntry>(Channel.UNLIMITED) }
@@ -144,9 +140,13 @@ fun composeApp() {
         }
     }
 
+    scope.initApp(ahk, db)
+}
+
+fun CoroutineScope.initApp(ahk: AHK, db: DBMap) {
     ahk.start()
 
-    scope.launch {
+    launch {
         ahk.registerHotString("btw", "by the way")
         db.keys.forEach { key ->
             db[key]?.let { value ->
