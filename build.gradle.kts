@@ -1,3 +1,5 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
     kotlin("multiplatform") version "2.0.20"
     id("org.jetbrains.compose") version "1.6.11"
@@ -39,5 +41,14 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "com.niki.MainKt"
+        nativeDistributions {
+            targetFormats(TargetFormat.Msi, TargetFormat.Exe) // 指定生成EXE和MSI
+            packageName = "ahk4k"
+            packageVersion = "1.0.0"
+            windows {
+                msiPackageVersion = packageVersion
+                exePackageVersion = packageVersion
+            }
+        }
     }
 }
