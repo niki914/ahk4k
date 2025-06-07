@@ -5,7 +5,8 @@ import androidx.compose.ui.window.application
 import com.niki.ahk.Key
 import com.niki.ahk.framework.HotStringAhk
 import com.niki.ahk.framework.load
-import com.niki.common.Log
+import com.niki.common.logD
+import com.niki.common.logI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -18,18 +19,18 @@ fun main() = runBlocking {
         ahk.load {
             hotkey {
                 register(Key.Control, Key.Shift, Key.A) {
-                    Log.i("", "Launching notepad...")
+                    logI("Launching notepad...")
                     ProcessBuilder("notepad.exe").start()
                 }
                 register(Key.A, Key.B, Key.C) {
-                    Log.d("", "ABC hotkey triggered")
+                    logD("ABC hotkey triggered")
                 }
             }
 
             hotString {
                 register("name", "niki")
                 register("tst") {
-                    Log.i("", "Launching calculator...")
+                    logI("Launching calculator...")
                     ProcessBuilder("calc.exe").start()
                 }
             }
@@ -37,7 +38,7 @@ fun main() = runBlocking {
             start()
         }
 
-        Log.i("", "KMP-AHK running. Press Ctrl+C to exit...")
+        logI("KMP-AHK running. Press Ctrl+C to exit...")
     }
 
     // 启动 Compose UI

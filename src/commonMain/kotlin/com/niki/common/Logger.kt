@@ -1,29 +1,31 @@
 package com.niki.common
 
-abstract class Logger {
-    enum class Level {
-        VERBOSE, DEBUG, INFO, WARN, ERROR
-    }
-
+internal abstract class Logger(var logLevel: LogLevel) {
     fun v(tag: String = "", msg: String = "") {
-        onLog(Level.VERBOSE, tag, msg)
+        onLogInternal(LogLevel.VERBOSE, tag, msg)
     }
 
     fun d(tag: String = "", msg: String = "") {
-        onLog(Level.DEBUG, tag, msg)
+        onLogInternal(LogLevel.DEBUG, tag, msg)
     }
 
     fun i(tag: String = "", msg: String = "") {
-        onLog(Level.INFO, tag, msg)
+        onLogInternal(LogLevel.INFO, tag, msg)
     }
 
     fun w(tag: String = "", msg: String = "") {
-        onLog(Level.WARN, tag, msg)
+        onLogInternal(LogLevel.WARN, tag, msg)
     }
 
     fun e(tag: String = "", msg: String = "", throwable: Throwable? = null) {
-        onLog(Level.ERROR, tag, msg, throwable)
+        onLogInternal(LogLevel.ERROR, tag, msg, throwable)
     }
 
-    protected abstract fun onLog(level: Level, tag: String = "", msg: String = "", throwable: Throwable? = null)
+    protected abstract fun onLog(level: LogLevel, tag: String = "", msg: String = "", throwable: Throwable? = null)
+
+    private fun onLogInternal(level: LogLevel, tag: String = "", msg: String = "", throwable: Throwable? = null) {
+        if (logLevel > level) return
+
+        onLog(level, tag, msg, throwable)
+    }
 }
