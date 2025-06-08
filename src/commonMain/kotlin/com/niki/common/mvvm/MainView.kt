@@ -1,22 +1,22 @@
 package com.niki.common.mvvm
 
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.niki.common.ui.MainComposePage
 
-fun V() = application(false) {
-    VM.observeToVisibility { visibility ->
+fun MainView() = application(false) {
+    MainViewModel.observeToVisibility { visibility ->
         if (!visibility) {
             exitApplication()
         }
     }
 
     Window(
+        title = "ahk4j-UI",
+        alwaysOnTop = true,
         onCloseRequest = {
-            VM.hide()
-        },
-        title = "ahk4j-UI"
+            MainViewModel.hide()
+        }
     ) {
         MainComposePage()
 
@@ -26,13 +26,13 @@ fun V() = application(false) {
         // 如果它与 UI 存在紧密关联，则放在这里。
         // 为了开关 Compose，我们假设 VM.initApp() 也需要随着 Compose 的出现而初始化。
         // 这是一个简单的例子，可能需要根据 VM.initApp() 的实际作用进行调整。
-        DisposableEffect(Unit) {
-            onDispose {
-                // 当 composeApp() 被移除时，可以在这里进行一些清理操作，
-                // 例如取消监听器，释放资源等。
-                // 假设 VM.cleanupApp() 是一个对应的清理函数。
-                // VM.cleanupApp()
-            }
-        }
+//        DisposableEffect(Unit) {
+//            onDispose {
+//                // 当 composeApp() 被移除时，可以在这里进行一些清理操作，
+//                // 例如取消监听器，释放资源等。
+//                // 假设 VM.cleanupApp() 是一个对应的清理函数。
+//                // VM.cleanupApp()
+//            }
+//        }
     }
 }

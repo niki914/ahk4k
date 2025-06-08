@@ -1,8 +1,8 @@
 package com.niki
 
 import com.niki.common.logging.logD
-import com.niki.common.mvvm.V
-import com.niki.common.mvvm.VM
+import com.niki.common.mvvm.MainView
+import com.niki.common.mvvm.MainViewModel
 import com.niki.windows.tray.SystemTrayHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -10,13 +10,13 @@ import kotlinx.coroutines.runBlocking
 import kotlin.system.exitProcess
 
 fun main(): Unit = runBlocking {
-    VM.initApp()
+    MainViewModel.initApp()
 
     // 在一个单独的协程中启动 Compose Application, 确保其持续运行
     // 这样即使窗口隐藏, application 作用域也不会结束
-    VM.observeToVisibility { v ->
+    MainViewModel.observeToVisibility { v ->
         if (v)
-            V()
+            MainView()
     }
 
     // 系统托盘的初始化和控制逻辑
@@ -25,14 +25,14 @@ fun main(): Unit = runBlocking {
             tooltip("ahk4k")
             iconResource("icon/tray_icon.jpg")
             onTrayClick {
-                VM.show()
+                MainViewModel.show()
             }
             menu {
                 item("show") {
-                    VM.show()
+                    MainViewModel.show()
                 }
                 item("hide") {
-                    VM.hide()
+                    MainViewModel.hide()
                 }
                 separator()
                 exitItem("exit") {

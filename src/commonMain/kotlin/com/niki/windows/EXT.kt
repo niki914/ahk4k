@@ -10,6 +10,10 @@ import java.nio.file.Files
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 
+fun <T> Set<T>.toCommaSeparatedString(name: T.() -> String): String {
+    return this.joinToString(separator = ", ") { it.name() }
+}
+
 fun copySrcAndGetPath(srcPath: String, suffix: String): String {
     val resource = AhkScriptRunner::class.java.classLoader
         .getResourceAsStream(srcPath + suffix)

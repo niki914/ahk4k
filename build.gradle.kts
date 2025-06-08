@@ -39,16 +39,12 @@ kotlin {
     }
 }
 
-tasks.withType<JavaExec> {
-    jvmArgs("-Dfile.encoding=UTF-8", "-Dconsole.encoding=UTF-8")
-}
-
 compose.desktop {
     application {
         mainClass = "com.niki.MainKt"
         buildTypes.release.proguard {
-            configurationFiles.from("proguard-rules.pro")
-            isEnabled.set(true)
+//            configurationFiles.from("proguard-rules.pro")
+//            isEnabled.set(true)
         }
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe) // 指定生成EXE和MSI

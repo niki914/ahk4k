@@ -7,6 +7,9 @@ import com.niki.ahk.HotString
 import com.niki.ahk.Key
 import com.niki.common.logging.logD
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -16,7 +19,9 @@ abstract class BaseAhk : AHK {
     protected val hotStrings = mutableMapOf<String, HotString>()
 
     protected val scope = CoroutineScope(Dispatchers.Default)
-    private val pressingKeys = mutableSetOf<Key>()
+
+    private val _pressingKeys = MutableStateFlow<Set<Key>>(emptySet())
+    val pressingKeys: StateFlow<Set<Key>> = _pressingKeys.asStateFlow() // 暴露为只读的 StateFlow
 
     private var isRunning = false
 
@@ -65,11 +70,12 @@ abstract class BaseAhk : AHK {
                 // 处理热键
                 val key = Key.fromNativeKeyCode(event.keyCode) ?: return
 
-                pressingKeys.add(key)
-                hotkeys[pressingKeys]?.let { action ->
+                _pressingKeys.value += key
+
+                hotkeys[_pressingKeys.value]?.let { action ->
                     scope.launch {
                         runCatching {
-                            logD("hotkey: $pressingKeys called")
+                            logD("hotkey: ${_pressingKeys.value} called")
                             action.run()
                         }
                     }
@@ -78,7 +84,8 @@ abstract class BaseAhk : AHK {
 
             override fun nativeKeyReleased(event: NativeKeyEvent) {
                 val key = Key.fromNativeKeyCode(event.keyCode) ?: return
-                pressingKeys.remove(key)
+                // 更新 _pressingKeys 的值
+                _pressingKeys.value = _pressingKeys.value - key
             }
 
             override fun nativeKeyTyped(event: NativeKeyEvent) {
@@ -98,7 +105,7 @@ abstract class BaseAhk : AHK {
         if (!isRunning) return
         isRunning = false
         scope.cancel()
-        pressingKeys.clear()
+        _pressingKeys.value = emptySet()
         GlobalScreen.unregisterNativeHook()
     }
 
