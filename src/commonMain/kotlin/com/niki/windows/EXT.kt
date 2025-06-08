@@ -1,7 +1,7 @@
 package com.niki.windows
 
+import com.niki.ahk.utils.AhkScriptRunner
 import com.niki.common.logging.logD
-import com.niki.common.logging.logE
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -11,12 +11,9 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 
 fun copySrcAndGetPath(srcPath: String, suffix: String): String {
-    val resource = (object {})::class.java.classLoader
+    val resource = AhkScriptRunner::class.java.classLoader
         .getResourceAsStream(srcPath + suffix)
-        ?: run {
-            logE("找不到 $srcPath")
-            throw IllegalStateException("找不到 $srcPath")
-        }
+        ?: throw IllegalStateException("找不到 ${srcPath + suffix}")
 
     val tempExe = File.createTempFile("~ahk4k_temp_", suffix).apply {
         deleteOnExit()

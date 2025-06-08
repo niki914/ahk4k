@@ -2,6 +2,7 @@ package com.niki.common.mvvm
 
 import com.niki.common.logging.LogEntry
 import com.niki.common.logging.LogLevel
+import com.niki.common.logging.logD
 import com.niki.common.logging.setOnLogCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,25 @@ object VM {
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow() // 暴露为 StateFlow 供 UI 观察
 
     val edit = MutableStateFlow("" to "")
+
+    private val _visibility = MutableStateFlow(true)
+    val visibility: StateFlow<Boolean> = _visibility.asStateFlow() // 暴露为 StateFlow 供 UI 观察
+
+    fun show() {
+        logD("显示窗口")
+        _visibility.value = true
+    }
+
+    fun hide() {
+        logD("隐藏窗口")
+        _visibility.value = false
+    }
+
+    fun observeToVisibility(listener: (Boolean) -> Unit) {
+        vmScope.launch {
+            visibility.collect { listener(it) }
+        }
+    }
 
     fun initApp() {
         setOnLogCallback { level, tag, msg, t ->
