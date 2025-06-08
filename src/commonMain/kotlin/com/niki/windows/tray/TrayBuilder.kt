@@ -6,7 +6,6 @@ package com.niki.windows.tray
 class TrayBuilder {
     private var tooltip: String = "Application"
     private var iconResource: String? = null
-    private var iconPath: String? = null
     private var onTrayClick: (() -> Unit)? = null
     private val menuItems = mutableListOf<TrayMenuItem>()
 
@@ -19,11 +18,6 @@ class TrayBuilder {
      * 设置资源图标路径
      */
     fun iconResource(resourcePath: String) = apply { this.iconResource = resourcePath }
-
-    /**
-     * 设置文件图标路径
-     */
-    fun iconPath(filePath: String) = apply { this.iconPath = filePath }
 
     /**
      * 设置托盘点击事件
@@ -57,12 +51,12 @@ class TrayBuilder {
      * 构建并立即创建系统托盘
      */
     fun build(): SystemTrayHelper? {
-        require(iconResource != null || iconPath != null) {
+        require(iconResource != null) {
             "Either iconResource or iconPath must be provided"
         }
 
         val helper = SystemTrayHelper()
-        val success = helper.initialize(tooltip, iconResource, iconPath, onTrayClick, menuItems)
+        val success = helper.initialize(tooltip, iconResource, onTrayClick, menuItems)
         return if (success) helper else null
     }
 }

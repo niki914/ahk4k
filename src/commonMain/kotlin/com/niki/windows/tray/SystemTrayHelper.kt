@@ -2,12 +2,13 @@ package com.niki.windows.tray
 
 import com.niki.common.logging.logD
 import com.niki.common.logging.logE
+import com.niki.windows.copySrcAndGetPath
 import java.awt.MenuItem
 import java.awt.PopupMenu
 import java.awt.SystemTray
 import java.awt.TrayIcon
 import java.awt.image.BufferedImage
-import java.io.InputStream
+import java.io.File
 import javax.imageio.ImageIO
 
 /**
@@ -53,8 +54,8 @@ class SystemTrayHelper {
     /**
      * 更新托盘图标
      */
-    fun updateIcon(iconPath: String? = null, iconResource: String? = null) {
-        val image = loadImage(iconPath, iconResource)
+    fun updateIcon(iconResource: String? = null) {
+        val image = loadImage(iconResource)
         image?.let {
             trayIcon?.image = it
         }
@@ -70,7 +71,6 @@ class SystemTrayHelper {
     internal fun initialize(
         tooltip: String,
         iconResource: String?,
-        iconPath: String?,
         onTrayClick: (() -> Unit)?,
         menuItems: List<TrayMenuItem>
     ): Boolean {
@@ -83,7 +83,7 @@ class SystemTrayHelper {
             systemTray = SystemTray.getSystemTray()
 
             // 加载图标
-            val image = loadImage(iconPath, iconResource)
+            val image = loadImage(iconResource)
             if (image == null) {
                 logD("托盘图标加载失败")
                 return false
@@ -101,11 +101,6 @@ class SystemTrayHelper {
                     }
                 }
             })
-
-            // 设置点击事件
-//            onTrayClick?.let { onClick ->
-//                trayIcon?.addActionListener { onClick() }
-//            }
 
             // 创建弹出菜单
             if (menuItems.isNotEmpty()) {
@@ -131,16 +126,13 @@ class SystemTrayHelper {
         }
     }
 
-    private fun loadImage(iconPath: String?, iconResource: String?): BufferedImage? {
+    private fun loadImage(iconResource: String?): BufferedImage? {
         return try {
-            val image = when {
+            val image: BufferedImage? = when {
                 iconResource != null -> {
-                    val inputStream: InputStream? = SystemTrayHelper::class.java.getResourceAsStream(iconResource)
-                    inputStream?.use { ImageIO.read(it) }
-                }
-
-                iconPath != null -> {
-                    ImageIO.read(java.io.File(iconPath))
+                    val path = copySrcAndGetPath(iconResource)
+                    val file = File(path)
+                    ImageIO.read(file)
                 }
 
                 else -> null
@@ -149,13 +141,14 @@ class SystemTrayHelper {
             image?.let {
                 // 获取系统托盘推荐尺寸
                 val traySize = SystemTray.getSystemTray().trayIconSize
+
                 val targetSize = if (traySize.width > 0 && traySize.height > 0) {
                     minOf(traySize.width, traySize.height) // 使用推荐尺寸的最小值
                 } else {
                     16 // 默认 16x16 像素，适用于大多数平台
                 }
 
-                // 缩放到目标尺寸
+// 缩放到目标尺寸
                 val scaled = it.getScaledInstance(targetSize, targetSize, java.awt.Image.SCALE_SMOOTH)
                 val scaledImage = BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB)
                 scaledImage.graphics.drawImage(scaled, 0, 0, null)

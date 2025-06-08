@@ -1,5 +1,6 @@
 package com.niki.ahk.utils
 
+import com.niki.windows.copySrcAndGetPath
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
@@ -9,15 +10,7 @@ import java.nio.charset.StandardCharsets
  */
 object AhkScriptRunner {
     private val AHK_PATH by lazy {
-        val resource = AhkScriptRunner::class.java.classLoader
-            .getResourceAsStream("ahk/AutoHotkey.exe")
-            ?: throw IllegalStateException("找不到 autoHotkey.exe")
-
-        val tempExe = File.createTempFile("~AutoHotkey_", ".exe").apply { deleteOnExit() }
-        FileOutputStream(tempExe).use { fos ->
-            resource.copyTo(fos)
-        }
-        tempExe.absolutePath
+        copySrcAndGetPath("ahk/AutoHotkey.exe")
     }
 
     const val NORMAL_AHK_HEADER = "" +

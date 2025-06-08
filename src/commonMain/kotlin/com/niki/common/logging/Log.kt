@@ -1,7 +1,7 @@
 package com.niki.common.logging
 
 private val LOG_LEVEL = LogLevel.VERBOSE
-private const val PRINTLN_TO_CONSOLE = false
+private const val PRINTLN_TO_CONSOLE = true
 
 fun logV(msg: String, tag: String = "") = Log.v(tag, msg)
 fun logD(msg: String, tag: String = "") = Log.d(tag, msg)

@@ -23,7 +23,7 @@ fun main(): Unit = runBlocking {
         delay(1000) // 稍作延迟, 确保 Compose UI 启动
         SystemTrayHelper.create {
             tooltip("ahk4k")
-            iconResource("/tray.JPG")
+            iconResource("icon\\tray_icon.jpg")
             onTrayClick {
                 AppState.show()
             }
