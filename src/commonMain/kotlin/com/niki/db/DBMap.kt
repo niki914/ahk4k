@@ -1,4 +1,4 @@
-package com.niki.db.v2
+package com.niki.db
 
 import java.nio.file.Files
 import java.nio.file.Paths
