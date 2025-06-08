@@ -1,4 +1,4 @@
-package com.niki.common
+package com.niki.common.logging
 
 internal abstract class Logger(var logLevel: LogLevel) {
     fun v(tag: String = "", msg: String = "") {

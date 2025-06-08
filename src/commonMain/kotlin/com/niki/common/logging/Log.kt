@@ -1,7 +1,7 @@
-package com.niki.common
+package com.niki.common.logging
 
 private val LOG_LEVEL = LogLevel.VERBOSE
-private const val PRINTLN_TO_CONSOLE = true
+private const val PRINTLN_TO_CONSOLE = false
 
 fun logV(msg: String, tag: String = "") = Log.v(tag, msg)
 fun logD(msg: String, tag: String = "") = Log.d(tag, msg)
@@ -25,8 +25,9 @@ private object Log : Logger(LOG_LEVEL) {
     private var callback: OnLogCallback? = null
 
     override fun onLog(level: LogLevel, tag: String, msg: String, throwable: Throwable?) {
-        if (PRINTLN_TO_CONSOLE)
+        if (PRINTLN_TO_CONSOLE) {
             println(msg)
+        }
         callback?.onLog(level, tag, msg, throwable)
     }
 

@@ -5,7 +5,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import com.niki.ahk.HotString
 import com.niki.ahk.Key
-import com.niki.common.logD
+import com.niki.common.logging.logD
 import kotlinx.coroutines.*
 import java.util.logging.Level
 import java.util.logging.Logger

@@ -22,8 +22,6 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0") // 协程
 //                implementation("com.google.code.gson:gson:2.10.1") // gson
 
-                implementation("org.rocksdb:rocksdbjni:7.10.2") // 数据库
-
                 implementation(compose.desktop.currentOs)
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -39,6 +37,10 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<JavaExec> {
+    jvmArgs("-Dfile.encoding=UTF-8", "-Dconsole.encoding=UTF-8")
 }
 
 compose.desktop {
