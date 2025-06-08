@@ -1,59 +1,37 @@
-package com.niki
+package com.niki.common.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.niki.ahk.framework.AHK
-import com.niki.common.LogLevel
-import com.niki.common.logE
-import com.niki.common.logI
-import com.niki.common.setOnLogCallback
-import com.niki.db.DBMap
+import com.niki.common.logging.LogLevel
+import com.niki.common.logging.logI
+import com.niki.common.mvvm.VM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 
-data class LogEntry(
-    val level: LogLevel,
-    val tag: String,
-    val message: String,
-    val timestamp: Long = System.currentTimeMillis()
-)
 
 @Composable
-fun composeApp(ahk: AHK, db: DBMap) {
-    val scope = CoroutineScope(Dispatchers.IO)
-    val logs = remember { mutableStateListOf<LogEntry>() }
-    val logChannel = remember { Channel<LogEntry>(Channel.UNLIMITED) }
+fun MainComposePage() {
+    val scope = CoroutineScope(Dispatchers.IO) // 这个 scope 仍然用于 launch 协程
 
-    // 收集日志
-    LaunchedEffect(Unit) {
-        logChannel.consumeEach { log ->
-            logs.add(log)
-        }
-    }
+    // 从 VM 中收集日志状态
+    val logs by VM.logs.collectAsState() // 观察 VM.logs StateFlow
+    val edit by VM.edit.collectAsState() // 观察 VM.logs StateFlow
 
-    setOnLogCallback { level, tag, msg, t ->
-        val tStr = t?.stackTraceToString() ?: ""
-        val message = if (tStr.isNotBlank()) "$tStr\n$msg" else msg
-        scope.launch {
-            logChannel.send(LogEntry(level, tag, message)) // 发送到 Channel
-        }
-    }
+    val keyInput = edit.first
+    val valueInput = edit.second
 
     MaterialTheme {
-        var keyInput by remember { mutableStateOf("") }
-        var valueInput by remember { mutableStateOf("") }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,25 +53,34 @@ fun composeApp(ahk: AHK, db: DBMap) {
                     )
                     TextField(
                         value = keyInput,
-                        onValueChange = { keyInput = it },
+                        onValueChange = {
+                            val newPair = VM.edit.value.run {
+                                copy(first = it)
+                            }
+                            VM.edit.value = newPair
+                        },
                         label = { Text("键") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     TextField(
                         value = valueInput,
-                        onValueChange = { valueInput = it },
+                        onValueChange = {
+                            val newPair = VM.edit.value.run {
+                                copy(second = it)
+                            }
+                            VM.edit.value = newPair
+                        },
                         label = { Text("值") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Button(
                         onClick = {
-                            if (keyInput.isNotBlank() && valueInput.isNotBlank()) {
-                                ahk.registerHotString(keyInput, valueInput)
-                                scope.launch(Dispatchers.IO) {
-                                    db[keyInput] = valueInput
-                                }
-                            } else {
+                            if (keyInput.isBlank() || valueInput.isBlank()) {
                                 logI("键或值不能为空")
+                                return@Button
+                            }
+                            scope.launch {
+                                VM.register(keyInput, valueInput)
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -121,7 +108,7 @@ fun composeApp(ahk: AHK, db: DBMap) {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        items(logs) { log ->
+                        items(logs) { log -> // 这里直接使用从 VM 观察到的 logs
                             Text(
                                 text = "[${log.level}] ${log.message}",
                                 color = when (log.level) {
@@ -139,22 +126,4 @@ fun composeApp(ahk: AHK, db: DBMap) {
             }
         }
     }
-
-    scope.initApp(ahk, db)
-}
-
-fun CoroutineScope.initApp(ahk: AHK, db: DBMap) {
-    ahk.start()
-
-    launch {
-        ahk.registerHotString("btw", "by the way")
-        db.keys.forEach { key ->
-            db[key]?.let { value ->
-                ahk.registerHotString(key, value)
-            }
-        }
-        logE("试试打出 'btw' 然后按空格!")
-    }
-
-    logI("KMP-AHK running.")
 }

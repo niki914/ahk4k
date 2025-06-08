@@ -2,7 +2,7 @@ package com.niki.ahk.framework
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.niki.ahk.utils.AhkScriptRunner
-import com.niki.common.logD
+import com.niki.common.logging.logD
 import kotlinx.coroutines.launch
 import java.awt.Robot
 import java.awt.event.KeyEvent
