@@ -23,8 +23,7 @@ object AhkScriptRunner {
     fun runSendInput(inputStr: String) {
         run(
             "SendMode Input\n" +
-                    "SendInput $inputStr\n" +
-                    "ExitApp"
+                    "SendInput $inputStr"
         )
     }
 
@@ -38,7 +37,7 @@ object AhkScriptRunner {
             // 写入 BOM (\xEF\xBB\xBF)
             fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
             // 写入脚本内容
-            fos.write((NORMAL_AHK_HEADER + script).toByteArray(StandardCharsets.UTF_8))
+            fos.write(("$NORMAL_AHK_HEADER$script\nExitApp").toByteArray(StandardCharsets.UTF_8))
         }
 
         // 运行 AHK 脚本

@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.awt.TrayIcon
 
 private fun registerLogCallback() = try {
     setOnLogCallback { level, tag, msg, t ->
@@ -71,11 +70,7 @@ fun main(): Unit {
                 launch {
                     delay(1000)
                     MainViewModel.test()
-                    MainViewModel.systemTrayHelper?.showMessage(
-                        "提示",
-                        "检测到您未安装原神! 即将开始下载!",
-                        TrayIcon.MessageType.WARNING
-                    )
+                    MainViewModel.installGenshin()
                 }
             } catch (t: Throwable) {
                 logE(t.stackTraceToString())

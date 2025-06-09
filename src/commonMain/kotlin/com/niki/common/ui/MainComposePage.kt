@@ -1,9 +1,6 @@
 package com.niki.common.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,8 +22,22 @@ fun MainComposePage() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HotStringInputCard()
-            Button(onClick = { MainViewModel.isShowingDialog.value = true }) {
-                Text(text = "记录热键(仅记录无实际作用)")
+            Row(
+                modifier = Modifier.fillMaxWidth(), // Make the Row fill the width
+                horizontalArrangement = Arrangement.SpaceAround // Distribute space evenly
+            ) {
+                Button(
+                    onClick = { MainViewModel.isShowingDialog.value = true },
+                    modifier = Modifier.weight(1f) // Give the button equal weight
+                ) {
+                    Text(text = "记录热键(仅记录无实际作用)")
+                }
+                Button(
+                    onClick = { MainViewModel.installGenshin() },
+                    modifier = Modifier.weight(1f) // Give the new button equal weight
+                ) {
+                    Text(text = "下载原神") // Text for the new button
+                }
             }
             LogOutputCard(modifier = Modifier.weight(1f))
 

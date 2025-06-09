@@ -7,13 +7,11 @@ import com.niki.common.logging.logD
 import com.niki.common.logging.logE
 import com.niki.config.Config
 import com.niki.windows.tray.SystemTrayHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import java.awt.TrayIcon
 import kotlin.system.exitProcess
 
 object MainViewModel {
@@ -102,6 +100,22 @@ object MainViewModel {
                 }
             }
         }
+    }
+
+    fun installGenshin() = vmScope.launch {
+        systemTrayHelper?.showMessage(
+            "提示",
+            "检测到您未安装原神! 即将开始下载!",
+            TrayIcon.MessageType.WARNING
+        )
+        delay(1000)
+        model.ahk.runScript("Run, https://ys-api.mihoyo.com/event/download_porter/link/ys_cn/official/pc_default")
+        delay(1000)
+        repeat(4) {
+            model.ahk.runScript("SendInput, {Tab}")
+            delay(30)
+        }
+        model.ahk.runScript("SendInput, {Enter}")
     }
 
     fun test() {
