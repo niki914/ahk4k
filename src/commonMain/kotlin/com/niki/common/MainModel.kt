@@ -1,4 +1,4 @@
-package com.niki.common.mvvm
+package com.niki.common
 
 import com.niki.ahk.framework.HotStringAhk
 import com.niki.config.Config

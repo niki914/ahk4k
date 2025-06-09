@@ -1,9 +1,11 @@
 package com.niki
 
 import com.niki.common.logging.*
-import com.niki.common.mvvm.MainView
-import com.niki.common.mvvm.MainViewModel
+import com.niki.common.MainView
+import com.niki.common.MainViewModel
+import com.niki.common.MainViewModel.observeState
 import com.niki.config.Config
+import com.niki.common.mvi.MainIntent
 import com.niki.windows.Path
 import com.niki.windows.singleton.AppSingletonManager
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +17,7 @@ private fun registerLogCallback() = try {
     setOnLogCallback { level, tag, msg, t ->
         val tStr = t?.stackTraceToString() ?: ""
         val message = if (tStr.isNotBlank()) "$tStr\n$msg" else msg
-        MainViewModel.addLog(level, tag, message) // 直接将日志添加到 VM
+        MainViewModel.sendIntent(MainIntent.AddLog(level, tag, message)) // 直接将日志添加到 VM
     }
 } catch (t: Throwable) {
     logE(t.stackTraceToString())
@@ -53,24 +55,24 @@ fun main(): Unit {
 
         runBlocking {
             try {
-                MainViewModel.initApp()
+                MainViewModel.sendIntent(MainIntent.InitApp)
 
                 // 在一个单独的协程中启动 Compose Application, 确保其持续运行
                 // 这样即使窗口隐藏, application 作用域也不会结束
-                MainViewModel.observeToVisibility { v ->
-                    if (v)
+                MainViewModel.observeState(MainViewModel.viewModelScope, { it.isWindowVisible }) { visible ->
+                    if (visible)
                         MainView()
                 }
 
+
                 // 系统托盘的初始化和控制逻辑
                 launch(Dispatchers.IO) {
-                    MainViewModel.initSystemTray()
+                    MainViewModel.sendIntent(MainIntent.InitSystemTray)
                 }
 
                 launch {
                     delay(1000)
-                    MainViewModel.test()
-                    MainViewModel.installGenshin()
+//                    MainViewModel.installGenshin()
                 }
             } catch (t: Throwable) {
                 logE(t.stackTraceToString())

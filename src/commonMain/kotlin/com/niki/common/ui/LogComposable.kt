@@ -7,8 +7,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,12 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.niki.common.logging.LogEntry
 import com.niki.common.logging.LogLevel
-import com.niki.common.mvvm.MainViewModel
 
 @Composable
-fun LogOutputCard(modifier: Modifier = Modifier) {
-    val logs by MainViewModel.logs.collectAsState()
-
+fun LogOutputCard(
+    logs: List<LogEntry>, // <--- 接收 logs 作为参数
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -39,16 +37,18 @@ fun LogOutputCard(modifier: Modifier = Modifier) {
                     .padding(bottom = 8.dp)
                     .fillMaxWidth()
             )
+            // 直接使用传入的 logs
             LogList(logs = logs)
         }
     }
 }
 
+// LogList 和 LogItem 保持不变，因为它们已经很好了
 @Composable
 fun LogList(logs: List<LogEntry>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.Start, // 如果也需要水平居中
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(logs) { log ->

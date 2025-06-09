@@ -1,16 +1,18 @@
-package com.niki.common.mvvm
+package com.niki.common
 
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.niki.common.MainViewModel.observeState
 import com.niki.common.ui.MainComposePage
 import com.niki.config.Config
+import com.niki.common.mvi.MainIntent
 import com.niki.windows.getImage
 import com.niki.windows.toPainter
 
 fun MainView() = application(false) {
-    MainViewModel.observeToVisibility { visibility ->
-        if (!visibility) {
+    MainViewModel.observeState(MainViewModel.viewModelScope, { it.isWindowVisible }) { visibe ->
+        if (!visibe) {
             exitApplication()
         }
     }
@@ -26,7 +28,7 @@ fun MainView() = application(false) {
         icon = iconImage, // 设置窗口图标
         alwaysOnTop = Config.alwaysOnTop(),
         onCloseRequest = {
-            MainViewModel.hide()
+            MainViewModel.sendIntent(MainIntent.HideWindow)
         }
     ) {
         MainComposePage()

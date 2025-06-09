@@ -1,4 +1,4 @@
-package com.niki.common.mvvm
+package com.niki.common
 
 import com.niki.ahk.Key
 import com.niki.common.logging.LogEntry
@@ -6,47 +6,58 @@ import com.niki.common.logging.LogLevel
 import com.niki.common.logging.logD
 import com.niki.common.logging.logE
 import com.niki.config.Config
+import com.niki.common.mvi.MVIViewModel
+import com.niki.common.mvi.MainEffect
+import com.niki.common.mvi.MainIntent
+import com.niki.common.mvi.MainState
 import com.niki.windows.tray.SystemTrayHelper
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.awt.TrayIcon
 import kotlin.system.exitProcess
 
-object MainViewModel {
-    val vmScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val model = MainModel()
+object MainViewModel : MVIViewModel<MainIntent, MainState, MainEffect>() {
+    private lateinit var model: MainModel
+    private var systemTrayHelper: SystemTrayHelper? = null
 
-    private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
-    val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow() // 暴露为 StateFlow 供 UI 观察
-
-    val edit = MutableStateFlow("" to "")
-    val isShowingDialog = MutableStateFlow(false)
     val currentKeys: StateFlow<Set<Key>> = model.ahk.pressingKeys
 
-    private val _visibility = MutableStateFlow(Config.getInitialVisibility())
-    val visibility: StateFlow<Boolean> = _visibility.asStateFlow() // 暴露为 StateFlow 供 UI 观察
-
-    var systemTrayHelper: SystemTrayHelper? = null
-
-    fun show() {
-        logD("显示窗口")
-        _visibility.value = true
+    override fun initUiState(): MainState {
+        model = MainModel()
+        return MainState(
+            isWindowVisible = Config.getInitialVisibility()
+        )
     }
 
-    fun hide() {
-        logD("隐藏窗口")
-        _visibility.value = false
-    }
-
-    fun observeToVisibility(listener: (Boolean) -> Unit) {
-        vmScope.launch {
-            visibility.collect { listener(it) }
+    // 处理 Intent
+    override fun handleIntent(intent: MainIntent) {
+        when (intent) {
+            MainIntent.ShowWindow -> show()
+            MainIntent.HideWindow -> hide()
+            is MainIntent.RegisterHotString -> register(intent.hotString, intent.replacement)
+            is MainIntent.AddLog -> addLog(intent.level, intent.tag, intent.msg)
+            MainIntent.InitApp -> initApp() // 内部处理函数，避免与公开函数混淆
+            MainIntent.InstallGenshin -> installGenshin()
+            MainIntent.InitSystemTray -> initSystemTray()
+            is MainIntent.UpdateEditField -> updateState { copy(edit = intent.first to intent.second) }
+            is MainIntent.SetKeyDialogVisibility -> updateState { copy(isShowingKeyDialog = intent.isShowing) }
+            is MainIntent.SetPWDialogVisibility -> updateState { copy(shouldShowPWDialog = intent.isShowing) }
         }
     }
 
-    fun initApp() {
+
+    private fun show() {
+        logD("显示窗口")
+        updateState { copy(isWindowVisible = true) }
+    }
+
+    private fun hide() {
+        logD("隐藏窗口")
+        updateState { copy(isWindowVisible = false) }
+    }
+
+    private fun initApp() {
         model.apply {
             ahk.start()
 
@@ -64,22 +75,21 @@ object MainViewModel {
         }
     }
 
-    fun register(hotString: String, replacement: String) {
+    private fun register(hotString: String, replacement: String) {
         model.apply {
             ahk.registerHotString(hotString, replacement)
             db[hotString] = replacement
         }
     }
 
-    fun addLog(level: LogLevel, tag: String, msg: String) {
-        vmScope.launch {
+    private fun addLog(level: LogLevel, tag: String, msg: String) {
+        viewModelScope.launch {
             val newLog = LogEntry(level, tag, msg)
-            _logs.value = (_logs.value + newLog).takeLast(Config.getLogSize())
+            updateState { copy(logs = (logs + newLog).takeLast(Config.getLogSize())) }
         }
     }
 
-
-    fun initSystemTray() {
+    private fun initSystemTray() {
         systemTrayHelper = SystemTrayHelper.create {
             tooltip(Config.getAppName())
             iconResource("icon/tray_icon.jpg")
@@ -102,7 +112,7 @@ object MainViewModel {
         }
     }
 
-    fun installGenshin() = vmScope.launch {
+    private fun installGenshin() = viewModelScope.launch {
         systemTrayHelper?.showMessage(
             "提示",
             "检测到您未安装原神! 即将开始下载!",
@@ -110,16 +120,5 @@ object MainViewModel {
         )
         delay(1000)
         model.ahk.runScript("Run, https://ys-api.mihoyo.com/event/download_porter/link/ys_cn/official/pc_default")
-        delay(1000)
-        repeat(4) {
-            model.ahk.runScript("SendInput, {Tab}")
-            delay(30)
-        }
-        model.ahk.runScript("SendInput, {Enter}")
-    }
-
-    fun test() {
-//        model.ahk.sendKeys(Key.A, Key.B, Key.Enter)
-//        model.ahk.sendKeys(Key.Control, Key.C)
     }
 }

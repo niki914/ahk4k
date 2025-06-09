@@ -1,6 +1,7 @@
 package com.niki.ahk
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
+import com.niki.common.logging.logE
 import java.awt.event.KeyEvent
 
 sealed class Key(val code: Int) {
@@ -236,7 +237,10 @@ sealed class Key(val code: Int) {
             NativeKeyEvent.VC_QUOTE -> Quote
             NativeKeyEvent.VC_MINUS -> Minus
             NativeKeyEvent.VC_EQUALS -> Equals
-            else -> null // 未定义的键
+            else -> {
+                logE("未在 Key 中定义的键: [$code] - ${NativeKeyEvent.getKeyText(code)}")
+                null
+            } // 未定义的键
         }
     }
 }
