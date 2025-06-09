@@ -52,9 +52,12 @@ compose.desktop {
             packageVersion = "1.0.0"
             windows {
                 menu = true
+//                console = true
                 msiPackageVersion = packageVersion
                 exePackageVersion = packageVersion
             }
+            modules("java.base", "java.desktop", "java.management") // 显式包含模块
+            includeAllModules = false // 避免打包不必要的模块
         }
     }
 }

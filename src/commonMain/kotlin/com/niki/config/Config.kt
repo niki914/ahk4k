@@ -1,11 +1,13 @@
 package com.niki.config
 
-object Config : IConfig {
-    override fun getAppName(): String {
-        return "ahk4k"
-    }
+import com.niki.common.logging.LogLevel
 
-    override fun getPassword(): String {
-        return "niki"
-    }
+object Config {
+    fun getAppName() = "ahk4k"
+    fun getPassword() = "niki"
+    fun getLogSize() = 70
+    fun getInitialVisibility() = true
+    fun getLogLevel() = LogLevel.VERBOSE
+    fun shouldPrintToConsole() = true
+    fun alwaysOnTop() = false
 }

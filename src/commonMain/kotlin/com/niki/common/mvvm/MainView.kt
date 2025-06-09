@@ -1,9 +1,12 @@
 package com.niki.common.mvvm
 
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.niki.common.ui.MainComposePage
 import com.niki.config.Config
+import com.niki.windows.getImage
+import com.niki.windows.toPainter
 
 fun MainView() = application(false) {
     MainViewModel.observeToVisibility { visibility ->
@@ -12,9 +15,16 @@ fun MainView() = application(false) {
         }
     }
 
+    val iconImage: Painter? = try {
+        getImage("icon/tray_icon.jpg").toPainter() // 相对 resources 的路径
+    } catch (t: Throwable) {
+        null
+    }
+
     Window(
         title = "${Config.getAppName()}-UI",
-        alwaysOnTop = true,
+        icon = iconImage, // 设置窗口图标
+        alwaysOnTop = Config.alwaysOnTop(),
         onCloseRequest = {
             MainViewModel.hide()
         }

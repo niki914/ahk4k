@@ -1,6 +1,10 @@
 package com.niki.windows
 
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.niki.common.logging.logD
+import java.awt.image.BufferedImage
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -8,6 +12,7 @@ import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
+import javax.imageio.ImageIO
 
 fun <T> Set<T>.toCommaSeparatedString(name: T.() -> String): String {
     return this.joinToString(separator = ", ") { it.name() }
@@ -29,6 +34,20 @@ fun copySrcAndGetPath(srcPath: String, suffix: String): String {
     return tempExe.absolutePath.also {
         logD("$srcPath copied to $it")
     }
+}
+
+fun BufferedImage.toPainter(): Painter {
+    // 1. 将 BufferedImage 转换为 org.jetbrains.skia.Image
+    val imageBitmap = this.toComposeImageBitmap()
+
+    // 2. 使用 BitmapPainter 创建 Painter
+    return BitmapPainter(imageBitmap)
+}
+
+fun getImage(iconResource: String): BufferedImage {
+    val path = copySrcAndGetPath(iconResource)
+    val file = File(path)
+    return ImageIO.read(file)
 }
 
 fun copySrcAndGetPath(srcPath: String): String {

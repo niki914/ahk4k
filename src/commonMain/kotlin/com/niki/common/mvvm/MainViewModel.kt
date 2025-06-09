@@ -5,6 +5,8 @@ import com.niki.common.logging.LogEntry
 import com.niki.common.logging.LogLevel
 import com.niki.common.logging.logD
 import com.niki.common.logging.logE
+import com.niki.config.Config
+import com.niki.windows.tray.SystemTrayHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,12 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 object MainViewModel {
     val vmScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val model = MainModel()
-
-    private const val logSize = 70
 
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow() // 暴露为 StateFlow 供 UI 观察
@@ -26,8 +27,10 @@ object MainViewModel {
     val isShowingDialog = MutableStateFlow(false)
     val currentKeys: StateFlow<Set<Key>> = model.ahk.pressingKeys
 
-    private val _visibility = MutableStateFlow(true)
+    private val _visibility = MutableStateFlow(Config.getInitialVisibility())
     val visibility: StateFlow<Boolean> = _visibility.asStateFlow() // 暴露为 StateFlow 供 UI 观察
+
+    var systemTrayHelper: SystemTrayHelper? = null
 
     fun show() {
         logD("显示窗口")
@@ -73,7 +76,31 @@ object MainViewModel {
     fun addLog(level: LogLevel, tag: String, msg: String) {
         vmScope.launch {
             val newLog = LogEntry(level, tag, msg)
-            _logs.value = (_logs.value + newLog).takeLast(logSize)
+            _logs.value = (_logs.value + newLog).takeLast(Config.getLogSize())
+        }
+    }
+
+
+    fun initSystemTray() {
+        systemTrayHelper = SystemTrayHelper.create {
+            tooltip(Config.getAppName())
+            iconResource("icon/tray_icon.jpg")
+            onTrayClick {
+                show()
+            }
+            menu {
+                item("show") {
+                    show()
+                }
+                item("hide") {
+                    hide()
+                }
+                separator()
+                exitItem("exit") {
+                    logD("退出应用")
+                    exitProcess(0) // 只有通过此菜单项才能真正退出应用
+                }
+            }
         }
     }
 
