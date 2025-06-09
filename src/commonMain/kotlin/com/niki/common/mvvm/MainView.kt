@@ -3,6 +3,7 @@ package com.niki.common.mvvm
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.niki.common.ui.MainComposePage
+import com.niki.config.Config
 
 fun MainView() = application(false) {
     MainViewModel.observeToVisibility { visibility ->
@@ -12,7 +13,7 @@ fun MainView() = application(false) {
     }
 
     Window(
-        title = "ahk4j-UI",
+        title = "${Config.getAppName()}-UI",
         alwaysOnTop = true,
         onCloseRequest = {
             MainViewModel.hide()

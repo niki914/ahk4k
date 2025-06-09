@@ -1,7 +1,10 @@
 package com.niki.common.mvvm
 
 import com.niki.ahk.Key
-import com.niki.common.logging.*
+import com.niki.common.logging.LogEntry
+import com.niki.common.logging.LogLevel
+import com.niki.common.logging.logD
+import com.niki.common.logging.logE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,12 +46,6 @@ object MainViewModel {
     }
 
     fun initApp() {
-        setOnLogCallback { level, tag, msg, t ->
-            val tStr = t?.stackTraceToString() ?: ""
-            val message = if (tStr.isNotBlank()) "$tStr\n$msg" else msg
-            addLog(level, tag, message) // 直接将日志添加到 VM
-        }
-
         model.apply {
             ahk.start()
 
@@ -78,5 +75,10 @@ object MainViewModel {
             val newLog = LogEntry(level, tag, msg)
             _logs.value = (_logs.value + newLog).takeLast(logSize)
         }
+    }
+
+    fun test() {
+//        model.ahk.sendKeys(Key.A, Key.B, Key.Enter)
+//        model.ahk.sendKeys(Key.Control, Key.C)
     }
 }

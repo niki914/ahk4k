@@ -4,13 +4,11 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.niki.ahk.utils.AhkScriptRunner
 import com.niki.common.logging.logD
 import kotlinx.coroutines.launch
-import java.awt.Robot
 import java.awt.event.KeyEvent
 
 class HotStringAhk(var endingChars: Set<Char>) : BaseAhk() {
     constructor(vararg endingChars: Char) : this(endingChars.toSet())
 
-    private val robot = Robot()
     private val sb = StringBuilder()
 
     private fun typeKey(value: Int) {

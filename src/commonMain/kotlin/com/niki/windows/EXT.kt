@@ -1,6 +1,5 @@
 package com.niki.windows
 
-import com.niki.ahk.utils.AhkScriptRunner
 import com.niki.common.logging.logD
 import java.io.File
 import java.io.FileOutputStream
@@ -15,7 +14,7 @@ fun <T> Set<T>.toCommaSeparatedString(name: T.() -> String): String {
 }
 
 fun copySrcAndGetPath(srcPath: String, suffix: String): String {
-    val resource = AhkScriptRunner::class.java.classLoader
+    val resource = object {}::class.java.classLoader
         .getResourceAsStream(srcPath + suffix)
         ?: throw IllegalStateException("找不到 ${srcPath + suffix}")
 

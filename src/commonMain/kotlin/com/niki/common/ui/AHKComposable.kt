@@ -27,13 +27,17 @@ fun CountdownDialog(
     var countdown by remember { mutableStateOf(countSecond) }
     val receivedData by dataFlow.collectAsState() // 监听 StateFlow
 
+    fun exit() {
+        onConfirm(receivedData.toSet())
+        onDismissRequest()
+    }
+
     LaunchedEffect(countdown) {
         if (countdown > 0) {
             delay(1000L) // 延迟1秒
             countdown--
         } else {
-            onConfirm(receivedData.toSet()) // 倒计时结束时，将当前dataFlow的值作为快照传递给onConfirm
-            onDismissRequest()
+            exit() // 倒计时结束时，将当前dataFlow的值作为快照传递给onConfirm
         }
     }
 
@@ -47,7 +51,7 @@ fun CountdownDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(receivedData) }) { // 点击确认时传递dataFlow的快照
+            Button(onClick = { exit() }) { // 点击确认时传递dataFlow的快照
                 Text(text = "确认")
             }
         },

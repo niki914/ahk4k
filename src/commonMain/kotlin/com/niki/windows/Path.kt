@@ -1,5 +1,6 @@
-package com.niki.ahk.utils
+package com.niki.windows
 
+import java.io.File
 import java.nio.file.Paths
 
 object Path {
@@ -32,8 +33,19 @@ object Path {
     private val isMac: Boolean
         get() = System.getProperty("os.name").contains("Mac", ignoreCase = true)
 
+    val exeDir: String
+        get() {
+            val codeSource = Path::class.java.protectionDomain.codeSource
+            val jarFile = codeSource.location.toURI()
+            val path = Paths.get(jarFile).parent.toString()
+            return path.appendDirIfNeeded() ?: throw IllegalStateException("Cannot determine EXE directory")
+        }
+
+    // 优化后的 appendDirIfNeeded, 考虑跨平台分隔符
     private fun String?.appendDirIfNeeded(): String? {
-        if (this == null || endsWith("\\")) return this
-        return this + "\\"
+        if (this == null) return null
+        val separator = File.separator // 动态获取系统分隔符
+        if (endsWith(separator)) return this
+        return this + separator
     }
 }

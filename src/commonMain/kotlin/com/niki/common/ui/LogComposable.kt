@@ -71,7 +71,7 @@ fun LogItem(log: LogEntry) {
         text = log.message,
         color = textColor,
         fontSize = 14.sp,
-        textAlign = TextAlign.Center,
+        textAlign = TextAlign.Start,
         modifier = Modifier
             .background(backgroundColor)
             .wrapContentSize(Alignment.CenterStart)

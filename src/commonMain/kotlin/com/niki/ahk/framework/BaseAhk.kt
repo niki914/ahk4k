@@ -5,11 +5,15 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import com.niki.ahk.HotString
 import com.niki.ahk.Key
+import com.niki.ahk.Key.A.toKeyEventCode
+import com.niki.ahk.utils.AhkScriptRunner
 import com.niki.common.logging.logD
+import com.niki.common.logging.logW
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.awt.Robot
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -24,12 +28,53 @@ abstract class BaseAhk : AHK {
     val pressingKeys: StateFlow<Set<Key>> = _pressingKeys.asStateFlow() // 暴露为只读的 StateFlow
 
     private var isRunning = false
+    protected val robot by lazy {
+        Robot()
+    }
 
     init {
         // 禁用 JNativeHook 日志
-        Logger.getLogger(GlobalScreen::class.java.`package`.name).apply {
+        Logger.getLogger(GlobalScreen::class.java.packageName).apply {
             level = Level.OFF
             useParentHandlers = false
+        }
+    }
+
+    override fun runScript(script: String) {
+        AhkScriptRunner.run(script)
+    }
+
+    override fun sendKeys(vararg keys: Key) {
+        logD("sendKeys: ${keys.joinToString()} starting")
+        scope.launch {
+            try {
+                // 按序按下所有按键
+                keys.forEach { key ->
+                    val keyCode = key.toKeyEventCode()
+
+                    try {
+                        robot.keyPress(keyCode)
+                        logD("Key pressed: $key")
+                    } catch (e: Exception) {
+                        logW("Key press failed for $key:\n${e.stackTraceToString()}")
+                    }
+                }
+                // 短暂延迟, 模拟快捷键保持
+                delay(50)
+                // 按序释放所有按键
+                keys.forEach { key ->
+                    val keyCode = key.toKeyEventCode()
+                    try {
+                        robot.keyRelease(keyCode)
+                        logD("Key released: $key")
+                    } catch (e: Exception) {
+                        logW("Key release failed for $key:\n${e.stackTraceToString()}")
+                    }
+                }
+                logD("sendKeys: ${keys.joinToString()} completed")
+            } catch (e: Exception) {
+                logW("sendKeys failed:\n${e.stackTraceToString()}")
+            }
         }
     }
 
