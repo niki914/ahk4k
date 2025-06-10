@@ -1,5 +1,6 @@
 package com.niki.ahk.utils
 
+import com.niki.ahk.Key
 import com.niki.windows.copySrcAndGetPath
 import java.io.File
 import java.io.FileOutputStream
@@ -20,10 +21,54 @@ object AhkScriptRunner {
             "SetBatchLines -1\n" +
             "#NoTrayIcon\n"
 
-    fun runSendInput(inputStr: String) {
+    fun press(key: Key) {
+        key.ahkString?.let {
+            sendInput(it)
+        }
+    }
+
+    fun pressNoCombo(vararg key: Key) {
+        val set = key.toSet()
+        val sb = StringBuilder().apply {
+            set.forEach {
+                val ahkString = it.ahkString ?: return@forEach
+                append(ahkString)
+            }
+        }
+        sb.toString().let { str ->
+            str.ifBlank { return }
+            sendInput(str)
+        }
+    }
+
+    fun pressCombo(vararg key: Key) {
+        val modifierSymbols = mutableListOf<String>() // 存放 AHK 修饰符符号
+        val normalKeyStrings = mutableListOf<String>() // 存放普通键的 AHK 字符串
+
+        key.forEach {
+            when (it) {
+                Key.Meta -> modifierSymbols.add("#") // 这里转换为 AHK 修饰符
+                Key.Ctrl -> modifierSymbols.add("^")
+                Key.Alt -> modifierSymbols.add("!")
+                Key.Shift -> modifierSymbols.add("+")
+                else -> normalKeyStrings.add(it.ahkString ?: "") // 其他键使用其 ahkString
+            }
+        }
+
+        val sb = StringBuilder()
+        modifierSymbols.forEach { sb.append(it) } // 先添加所有修饰符符号
+        normalKeyStrings.forEach { sb.append(it) } // 再添加普通键
+
+        sb.toString().let { str ->
+            str.ifBlank { return }
+            sendInput(str)
+        }
+    }
+
+    fun sendInput(inputStr: String) {
         run(
             "SendMode Input\n" +
-                    "SendInput $inputStr"
+                    "SendInput, $inputStr"
         )
     }
 

@@ -1,11 +1,10 @@
 package com.niki
 
-import com.niki.common.logging.*
 import com.niki.common.MainView
 import com.niki.common.MainViewModel
-import com.niki.common.MainViewModel.observeState
-import com.niki.config.Config
+import com.niki.common.logging.*
 import com.niki.common.mvi.MainIntent
+import com.niki.config.Config
 import com.niki.windows.Path
 import com.niki.windows.singleton.AppSingletonManager
 import kotlinx.coroutines.Dispatchers
@@ -72,6 +71,7 @@ fun main(): Unit {
 
                 launch {
                     delay(1000)
+//                    MainViewModel.ahk.sendKeys(Key.Meta, Key.R, useCombo = false)
 //                    MainViewModel.installGenshin()
                 }
             } catch (t: Throwable) {

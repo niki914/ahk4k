@@ -4,16 +4,22 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.niki.ahk.utils.AhkScriptRunner
 import com.niki.common.logging.logD
 import kotlinx.coroutines.launch
+import java.awt.Robot
 import java.awt.event.KeyEvent
 
 class HotStringAhk(var endingChars: Set<Char>) : BaseAhk() {
     constructor(vararg endingChars: Char) : this(endingChars.toSet())
 
     private val sb = StringBuilder()
+    private val robot by lazy {
+        Robot()
+    }
 
-    private fun typeKey(value: Int) {
-        robot.keyPress(value)
-        robot.keyRelease(value)
+    private fun backspace(times: Int = 1) {
+        repeat(times) {
+            robot.keyPress(KeyEvent.VK_BACK_SPACE)
+            robot.keyRelease(KeyEvent.VK_BACK_SPACE)
+        }
     }
 
     override fun onNativeKeyTyped(event: NativeKeyEvent) {
@@ -40,21 +46,19 @@ class HotStringAhk(var endingChars: Set<Char>) : BaseAhk() {
                 sb.clear()
 
                 // 删除输入的字符串(包括结束符)
-                repeat(input.length) {
-                    typeKey(KeyEvent.VK_BACK_SPACE)
-                }
+                backspace(input.length)
 
                 hotString.apply {
                     scope.launch {
                         action?.let { runnable ->
                             runCatching {
-                                logD("hotString: $hotString called")
+                                logD("热字符串: $hotString 调用")
                                 runnable.run()
                             }
                         } ?: replacement?.let {
                             runCatching {
-                                logD("hotString: $hotString called")
-                                AhkScriptRunner.runSendInput(it)
+                                logD("热字符串: $hotString 调用")
+                                AhkScriptRunner.sendInput(it)
                             }
                         }
                     }

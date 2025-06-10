@@ -32,7 +32,7 @@ fun copySrcAndGetPath(srcPath: String, suffix: String): String {
     }
 
     return tempExe.absolutePath.also {
-        logD("$srcPath copied to $it")
+        logD("复制 '$srcPath' 到 '$it'")
     }
 }
 
