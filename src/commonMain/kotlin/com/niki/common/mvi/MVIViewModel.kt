@@ -44,11 +44,6 @@ abstract class MVIViewModel<Intent, State, Effect> {
         }
 
     /**
-     * view 用于观察 state 的变化
-     */
-    fun observeState(observe: Flow<State>.() -> Unit) = observe(uiStateFlow)
-
-    /**
      * viewmodel 对 view 发送数据
      *
      * view 需要对 effectFlow collect
@@ -65,19 +60,32 @@ abstract class MVIViewModel<Intent, State, Effect> {
      */
     protected abstract fun handleIntent(intent: Intent)
 
-    fun <T, R> MVIViewModel<*, T, *>.observeState(
-        scope: CoroutineScope,
-        filter: suspend (T) -> R,
+    /**
+     * 使用 view model scope 来观察
+     */
+    fun <R> observeState(
+        filter: suspend (State) -> R,
         action: suspend (R) -> Unit
     ) {
-        observeState {
+        observeState(viewModelScope, filter, action)
+    }
+
+    /**
+     * 状态观察的简化版
+     */
+    fun <R> observeState(
+        scope: CoroutineScope,
+        filter: suspend (State) -> R,
+        action: suspend (R) -> Unit
+    ) {
+        uiStateFlow.apply {
             scope.launch {
                 map(filter).collect(action)
             }
         }
     }
 
-    suspend fun <T> MVIViewModel<*, *, T>.collectFlow(action: suspend (T) -> Unit) {
+    suspend fun collectFlow(action: suspend (Effect) -> Unit) {
         uiEffectFlow.collect(action)
     }
 }

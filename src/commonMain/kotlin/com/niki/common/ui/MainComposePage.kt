@@ -11,14 +11,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.niki.common.logging.logE
 import com.niki.common.MainViewModel
+import com.niki.common.logging.logE
 import com.niki.common.mvi.MainIntent
 import com.niki.windows.toCommaSeparatedString
 
 @Composable
-fun MainComposePage() { // 通过 MainViewModel2() 获取 ViewModel 实例
-    // 收集 ViewModel 的整体 UI 状态
+fun MainComposePage() {
     val uiState by MainViewModel.uiStateFlow.collectAsState()
     val currentKeys by MainViewModel.currentKeys.collectAsState()
 
@@ -48,10 +47,10 @@ fun MainComposePage() { // 通过 MainViewModel2() 获取 ViewModel 实例
                 keyInput = uiState.edit.first,
                 valueInput = uiState.edit.second,
                 onKeyChange = { newKey ->
-                    MainViewModel.sendIntent(MainIntent.UpdateEditField(newKey, uiState.edit.second))
+                    MainViewModel.sendIntent(MainIntent.UpdateEditField(key = newKey))
                 },
                 onValueChange = { newValue ->
-                    MainViewModel.sendIntent(MainIntent.UpdateEditField(uiState.edit.first, newValue))
+                    MainViewModel.sendIntent(MainIntent.UpdateEditField(value = newValue))
                 },
                 onAddClick = { key, value ->
                     if (key.isBlank() || value.isBlank()) {
@@ -64,7 +63,7 @@ fun MainComposePage() { // 通过 MainViewModel2() 获取 ViewModel 实例
 
             // ActionButtons：传递点击事件回调
             ActionButtons(
-                onRecordHotKeyClick = { MainViewModel.sendIntent(MainIntent.SetKeyDialogVisibility(true)) },
+                onRecordHotKeyClick = { MainViewModel.sendIntent(MainIntent.SetHotkeyDialogVisibility(true)) },
                 onDownloadGenshinClick = { MainViewModel.sendIntent(MainIntent.InstallGenshin) }
             )
 
@@ -79,11 +78,11 @@ fun MainComposePage() { // 通过 MainViewModel2() 获取 ViewModel 实例
                 CountdownDialog(
                     countSecond = 4,
                     currentKeys = currentKeys,
-                    onDismissRequest = { MainViewModel.sendIntent(MainIntent.SetKeyDialogVisibility(false)) },
+                    onDismissRequest = { MainViewModel.sendIntent(MainIntent.SetHotkeyDialogVisibility(false)) },
                     onConfirm = { recordedKeys ->
                         val str = recordedKeys.toCommaSeparatedString { this::class.java.simpleName }
                         logE("记录热键: $str")
-                        MainViewModel.sendIntent(MainIntent.SetKeyDialogVisibility(false)) // 确认后关闭对话框
+                        MainViewModel.sendIntent(MainIntent.SetHotkeyDialogVisibility(false)) // 确认后关闭对话框
                     }
                 )
             }

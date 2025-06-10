@@ -38,7 +38,7 @@ class SystemTrayHelper {
         trayIcon?.let { icon ->
             systemTray?.remove(icon)
             trayIcon = null
-            logD("System tray icon removed")
+            logD("托盘图标移除")
         }
     }
 
@@ -127,31 +127,13 @@ class SystemTrayHelper {
 
     private fun loadImage(iconResource: String?): BufferedImage? {
         return try {
-            val image: BufferedImage? = when {
+            when {
                 iconResource != null -> {
                     getImage(iconResource)
                 }
 
                 else -> null
             }
-
-//            image?.let {
-//                // 获取系统托盘推荐尺寸
-//                val traySize = SystemTray.getSystemTray().trayIconSize
-//
-//                val targetSize = if (traySize.width > 0 && traySize.height > 0) {
-//                    minOf(traySize.width, traySize.height) // 使用推荐尺寸的最小值
-//                } else {
-//                    16 // 默认 16x16 像素，适用于大多数平台
-//                }
-//
-//                // 缩放到目标尺寸
-//                val scaled = it.getScaledInstance(targetSize, targetSize, java.awt.Image.SCALE_SMOOTH)
-//                val scaledImage = BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB)
-//                scaledImage.graphics.drawImage(scaled, 0, 0, null)
-//                scaledImage
-//            }
-            image
         } catch (e: Exception) {
             logE(e.stackTraceToString())
             null

@@ -1,15 +1,16 @@
 package com.niki.common
 
 import com.niki.ahk.Key
+import com.niki.ahk.framework.AHK
 import com.niki.common.logging.LogEntry
 import com.niki.common.logging.LogLevel
 import com.niki.common.logging.logD
 import com.niki.common.logging.logE
-import com.niki.config.Config
 import com.niki.common.mvi.MVIViewModel
 import com.niki.common.mvi.MainEffect
 import com.niki.common.mvi.MainIntent
 import com.niki.common.mvi.MainState
+import com.niki.config.Config
 import com.niki.windows.tray.SystemTrayHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,12 @@ import kotlin.system.exitProcess
 object MainViewModel : MVIViewModel<MainIntent, MainState, MainEffect>() {
     private lateinit var model: MainModel
     private var systemTrayHelper: SystemTrayHelper? = null
+//    val ahk: AHK // 仅供测试
+//        get() = model.ahk
 
+    /**
+     * 这受到model层控制, 所以例外了
+     */
     val currentKeys: StateFlow<Set<Key>> = model.ahk.pressingKeys
 
     override fun initUiState(): MainState {
@@ -40,9 +46,14 @@ object MainViewModel : MVIViewModel<MainIntent, MainState, MainEffect>() {
             MainIntent.InitApp -> initApp() // 内部处理函数，避免与公开函数混淆
             MainIntent.InstallGenshin -> installGenshin()
             MainIntent.InitSystemTray -> initSystemTray()
-            is MainIntent.UpdateEditField -> updateState { copy(edit = intent.first to intent.second) }
-            is MainIntent.SetKeyDialogVisibility -> updateState { copy(isShowingKeyDialog = intent.isShowing) }
-            is MainIntent.SetPWDialogVisibility -> updateState { copy(shouldShowPWDialog = intent.isShowing) }
+            is MainIntent.UpdateEditField -> updateState {
+                val key = intent.key ?: edit.first
+                val value = intent.value ?: edit.second
+                copy(edit = key to value)
+            }
+
+            is MainIntent.SetHotkeyDialogVisibility -> updateState { copy(isShowingKeyDialog = intent.visible) }
+            is MainIntent.SetPWDialogVisibility -> updateState { copy(shouldShowPWDialog = intent.visible) }
         }
     }
 

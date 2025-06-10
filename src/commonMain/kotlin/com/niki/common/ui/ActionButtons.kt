@@ -11,10 +11,9 @@ import androidx.compose.ui.unit.dp
 fun ActionButtons(
     onRecordHotKeyClick: () -> Unit, // 新增回调，用于通知父级记录热键点击事件
     onDownloadGenshinClick: () -> Unit, // 新增回调，用于通知父级下载原神点击事件
-    modifier: Modifier = Modifier // 允许外部传入修饰符
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(), // 使用传入的 modifier
+        modifier = Modifier.fillMaxWidth(), // 使用传入的 modifier
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         Button(
